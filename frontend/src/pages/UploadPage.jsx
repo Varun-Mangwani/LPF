@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card'
@@ -20,7 +20,9 @@ import {
   Cpu,
   Database,
   Calendar,
-  Wallet
+  Wallet,
+  Wifi,
+  Loader2
 } from 'lucide-react'
 
 function StepIndicator({ step }) {
@@ -164,9 +166,27 @@ export default function UploadPage() {
   const [goalDate,   setGoalDate]   = useState('2027-05-01')
   const [file,       setFile]       = useState(null)
   const [uploading,  setUploading]  = useState(false)
+  const [uploadPhase, setUploadPhase] = useState('')
   const [resetting,  setResetting]  = useState(false)
   const [error,      setError]      = useState('')
   const [uploadResult, setUploadResult] = useState(null)
+  const [backendStatus, setBackendStatus] = useState({ checked: false, online: false })
+
+  // Check live backend health on load
+  useEffect(() => {
+    let active = true
+    api.checkHealth().then((res) => {
+      if (active) {
+        setBackendStatus({
+          checked: true,
+          online: !!res?.online,
+          mode: res?.mode,
+          url: res?.url || api.getBaseUrl(),
+        })
+      }
+    })
+    return () => { active = false }
+  }, [])
 
   const goToDashboard = () => navigate('/dashboard')
   const handleSkipDemo = () => navigate('/dashboard')
@@ -187,17 +207,27 @@ export default function UploadPage() {
   }
 
   const handleUpload = async (e) => {
-    e.preventDefault()
+    if (e && e.preventDefault) e.preventDefault()
     if (!file) { setError('Please select a CSV file.'); return }
     setUploading(true)
     setError('')
+    setUploadPhase('Uploading bank statement to server...')
+
+    const t1 = setTimeout(() => setUploadPhase('Classifying transactions & matching merchant rules...'), 2000)
+    const t2 = setTimeout(() => setUploadPhase('Detecting recurring subscriptions & analyzing cashflow...'), 5000)
+
     try {
       const result = await api.uploadCsv(file)
+      clearTimeout(t1)
+      clearTimeout(t2)
       setUploadResult(result)
     } catch (err) {
+      clearTimeout(t1)
+      clearTimeout(t2)
       setError(err.message || 'Error processing CSV file.')
     } finally {
       setUploading(false)
+      setUploadPhase('')
     }
   }
 
@@ -227,6 +257,29 @@ export default function UploadPage() {
         <p className="font-mono text-xs uppercase tracking-wider text-slate-500 font-semibold mt-1">
           Self-hosted • Deterministic calculations • Zero cloud telemetry
         </p>
+
+        {/* Backend Connectivity Status */}
+        <div className="mt-3 flex items-center justify-center gap-2">
+          {backendStatus.checked ? (
+            backendStatus.online ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-subtle">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Backend Connected: <span className="font-bold">{backendStatus.url}</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-medium bg-amber-50 text-amber-800 border border-amber-200 shadow-subtle">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                Connecting to Cloud Server... (waking up Render instance)
+              </span>
+            )
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono text-slate-500 bg-slate-50 border border-slate-200">
+              <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+              Checking backend connection...
+            </span>
+          )}
+        </div>
+
         <StepIndicator step={step} />
       </div>
 
@@ -341,10 +394,40 @@ export default function UploadPage() {
                 ))}
               </div>
 
+              {uploading && (
+                <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl font-mono text-xs text-indigo-700 flex items-center gap-2.5 animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600 flex-shrink-0" />
+                  <span>{uploadPhase || 'Processing bank statement...'}</span>
+                </div>
+              )}
+
               {error && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl font-mono text-xs text-rose-700 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
-                  <span>{error}</span>
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2.5">
+                  <div className="font-mono text-xs text-rose-700 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600 mt-0.5" />
+                    <span className="leading-relaxed">{error}</span>
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="primary"
+                      onClick={handleUpload}
+                      disabled={uploading || !file}
+                      className="text-xs h-7 px-3"
+                    >
+                      Retry Upload
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleSkipDemo}
+                      className="text-xs h-7 px-3"
+                    >
+                      Continue with Demo Data
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -353,7 +436,7 @@ export default function UploadPage() {
                 Use Demo Dataset
               </Button>
               <Button type="submit" variant="primary" isLoading={uploading} disabled={!file} icon={UploadCloud}>
-                {uploading ? 'Processing Statement...' : 'Ingest & Classify'}
+                {uploading ? (uploadPhase || 'Processing...') : 'Ingest & Classify'}
               </Button>
             </CardFooter>
           </form>

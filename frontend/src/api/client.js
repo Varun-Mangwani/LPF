@@ -14,7 +14,9 @@ import alertsMock    from '../mock/alerts.json'
 import transactionsMock from '../mock/transactions.json'
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const rawBase = import.meta.env.VITE_API_BASE_URL || 'https://lpf-rqjg.onrender.com'
+// Always remove trailing slashes to prevent //api/... 404 errors on FastAPI
+export const BASE_URL = rawBase.trim().replace(/\/+$/, '')
 const USER_ID  = import.meta.env.VITE_USER_ID || '1'
 
 const wait = (ms) => new Promise((res) => setTimeout(res, ms))
@@ -67,10 +69,12 @@ function fallbackMock(path, options = {}) {
 /** Fetch wrapper for real backend calls with auto fallback */
 async function real(path, options = {}) {
   try {
-    const separator = path.includes('?') ? '&' : '?'
-    const url = `${BASE_URL}${path}${separator}user_id=${USER_ID}`
+    const cleanPath = path.startsWith('/') ? path : `/${path}`
+    const separator = cleanPath.includes('?') ? '&' : '?'
+    const url = `${BASE_URL}${cleanPath}${separator}user_id=${USER_ID}`
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 2500)
+    // Render free-tier cold starts take 25-45s, allow up to 30s timeout
+    const timer = setTimeout(() => controller.abort(), 30000)
     const res = await fetch(url, {
       signal: controller.signal,
       headers: options.body instanceof FormData
@@ -81,7 +85,7 @@ async function real(path, options = {}) {
     clearTimeout(timer)
     if (!res.ok) {
       const detail = await res.json().catch(() => ({}))
-      throw new Error(detail?.detail || `${options.method || 'GET'} ${path} → ${res.status}`)
+      throw new Error(detail?.detail || `${options.method || 'GET'} ${cleanPath} → ${res.status}`)
     }
     return res.json()
   } catch (err) {
@@ -95,6 +99,32 @@ async function real(path, options = {}) {
 // ─────────────────────────────────────────────────────────────
 
 export const api = {
+  // ── Health Check ─────────────────────────────────────────
+  async checkHealth() {
+    if (USE_MOCK) return { status: 'ok', mode: 'mock', online: true }
+    try {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 8000)
+      const res = await fetch(`${BASE_URL}/health`, { signal: controller.signal })
+      clearTimeout(timer)
+      if (res.ok) {
+        const data = await res.json().catch(() => ({ status: 'ok' }))
+        return { ...data, online: true, mode: 'real', url: BASE_URL }
+      }
+      return { online: false, mode: 'real', url: BASE_URL, status: res.status }
+    } catch (err) {
+      return { online: false, mode: 'real', url: BASE_URL, error: err.message }
+    }
+  },
+
+  getBaseUrl() {
+    return BASE_URL
+  },
+
+  isMockMode() {
+    return USE_MOCK
+  },
+
   // ── Upload ──────────────────────────────────────────────
   async uploadCsv(file) {
     if (USE_MOCK) {
@@ -103,15 +133,33 @@ export const api = {
     }
     const form = new FormData()
     form.append('file', file)
-    const res = await fetch(`${BASE_URL}/api/upload?user_id=${USER_ID}`, {
-      method: 'POST',
-      body: form,
-    })
-    if (!res.ok) {
-      const detail = await res.json().catch(() => ({}))
-      throw new Error(detail?.detail || `Upload failed: ${res.status}`)
+    const controller = new AbortController()
+    // Give up to 60 seconds for statement upload + rule/LLM categorization + potential cold start
+    const timer = setTimeout(() => controller.abort(), 60000)
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/upload?user_id=${USER_ID}`, {
+        method: 'POST',
+        body: form,
+        signal: controller.signal,
+      })
+      clearTimeout(timer)
+
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}))
+        throw new Error(detail?.detail || `Upload failed with status: ${res.status}`)
+      }
+      return await res.json()
+    } catch (err) {
+      clearTimeout(timer)
+      if (err.name === 'AbortError') {
+        throw new Error('Upload timed out after 60 seconds. The server may still be processing or waking up from sleep. Please try again.')
+      }
+      if (err.message === 'Failed to fetch' || err instanceof TypeError) {
+        throw new Error(`Failed to connect to backend (${BASE_URL}). The cloud server may be waking up (Render free tier takes ~30-45s) or offline. Please wait a few seconds and try again.`)
+      }
+      throw err
     }
-    return res.json()
   },
 
   // ── Transactions ─────────────────────────────────────────
