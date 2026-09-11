@@ -1,4 +1,14 @@
 import { useEffect, useState } from 'react'
+import {
+  Target,
+  Plus,
+  Edit3,
+  Trash2,
+  Calendar,
+  Sparkles,
+  TrendingUp,
+  CheckCircle2,
+} from 'lucide-react'
 import { api } from '../api/client.js'
 import GoalForm           from '../components/GoalForm.jsx'
 import RecommendationCard from '../components/RecommendationCard.jsx'
@@ -10,7 +20,7 @@ import { Skeleton } from '../components/ui/Skeleton'
 
 const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`
 
-/** Inline edit form for an existing goal — calls PUT /api/goals/{id} */
+/** Inline edit form for an existing goal */
 function GoalEditForm({ goal, onSave, onCancel }) {
   const [name,    setName]    = useState(goal.name)
   const [target,  setTarget]  = useState(String(goal.target_amount))
@@ -39,11 +49,11 @@ function GoalEditForm({ goal, onSave, onCancel }) {
     }
   }
 
-  const inputCls = "w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-mono text-xs bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none"
+  const inputCls = "w-full px-3.5 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-900 focus:border-indigo-500 focus:outline-none shadow-subtle"
 
   return (
-    <form onSubmit={handleSave} className="space-y-3 mt-3 p-4 bg-indigo-50/60 border border-indigo-200 rounded-2xl">
-      <p className="font-mono text-[10px] uppercase tracking-widest text-indigo-700 font-bold">Edit Goal</p>
+    <form onSubmit={handleSave} className="space-y-3 mt-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl animate-slide-down shadow-subtle">
+      <p className="text-xs font-semibold text-indigo-700">Edit Goal Parameters</p>
 
       <input
         value={name}
@@ -53,30 +63,24 @@ function GoalEditForm({ goal, onSave, onCancel }) {
         className={inputCls}
       />
 
-      <div className="grid grid-cols-3 gap-2">
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[11px] text-slate-500 font-bold">₹</span>
-          <input
-            type="number"
-            min="1"
-            required
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            placeholder="Target"
-            className={`${inputCls} pl-6`}
-          />
-        </div>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[11px] text-slate-500 font-bold">₹</span>
-          <input
-            type="number"
-            min="0"
-            value={current}
-            onChange={(e) => setCurrent(e.target.value)}
-            placeholder="Saved so far"
-            className={`${inputCls} pl-6`}
-          />
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <input
+          type="number"
+          min="1"
+          required
+          value={target}
+          onChange={(e) => setTarget(e.target.value)}
+          placeholder="Target Amount (₹)"
+          className={inputCls}
+        />
+        <input
+          type="number"
+          min="0"
+          value={current}
+          onChange={(e) => setCurrent(e.target.value)}
+          placeholder="Saved so far (₹)"
+          className={inputCls}
+        />
         <input
           type="date"
           required
@@ -86,14 +90,14 @@ function GoalEditForm({ goal, onSave, onCancel }) {
         />
       </div>
 
-      {error && <p className="font-mono text-xs text-rose-600">⚠️ {error}</p>}
+      {error && <p className="text-xs text-rose-600 font-semibold">⚠️ {error}</p>}
 
-      <div className="flex items-center gap-2">
-        <Button type="submit" variant="primary" size="sm" isLoading={saving}>
-          {saving ? 'Saving…' : 'Save Changes'}
-        </Button>
-        <Button type="button" variant="secondary" size="sm" onClick={onCancel}>
+      <div className="flex items-center gap-2 justify-end pt-1">
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
           Cancel
+        </Button>
+        <Button type="submit" variant="emerald" size="sm" isLoading={saving}>
+          {saving ? 'Saving…' : 'Save Changes'}
         </Button>
       </div>
     </form>
@@ -106,7 +110,7 @@ function GoalCard({ goal, onDelete, onUpdated }) {
   const progress     = goal.current_amount > 0
     ? Math.min(100, Math.round((goal.current_amount / goal.target_amount) * 100))
     : 0
-  const remaining    = goal.target_amount - goal.current_amount
+  const remaining    = Math.max(0, goal.target_amount - goal.current_amount)
   const mcr          = goal.monthly_contribution_required || 0
   const months       = goal.months_remaining ?? goal.months_left ?? '?'
   const targetLabel  = new Date(goal.target_date).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })
@@ -120,31 +124,36 @@ function GoalCard({ goal, onDelete, onUpdated }) {
     <div className="space-y-2 animate-slide-up">
       {/* Row: progress info + actions */}
       <div className="flex items-center justify-between px-1">
-        <span className="font-mono text-xs text-slate-500 font-bold uppercase tracking-wider">
-          {progress}% Saved · Target {targetLabel}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-slate-800">
+            {progress}% Completed
+          </span>
+          <span className="text-slate-500 text-xs">· Target: {targetLabel}</span>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setEditing((v) => !v)}
-            className="text-xs font-mono text-slate-400 hover:text-indigo-600 transition-colors p-1"
+            className="text-xs text-slate-400 hover:text-indigo-600 transition-colors p-1 flex items-center gap-1 font-medium"
             title="Edit goal"
           >
-            ✏️ Edit
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>Edit</span>
           </button>
           <button
             onClick={() => onDelete(goal.id)}
-            className="text-xs font-mono text-slate-400 hover:text-rose-600 transition-colors p-1"
+            className="text-xs text-slate-400 hover:text-rose-600 transition-colors p-1 flex items-center gap-1 font-medium"
             title="Remove goal"
           >
-            ✕ Remove
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Remove</span>
           </button>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden mb-2">
+      <div className="w-full h-2.5 bg-slate-100 border border-slate-200/60 rounded-full overflow-hidden mb-2">
         <div
-          className="h-full rounded-full bg-emerald-600 transition-all duration-700"
+          className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700 shadow-sm"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -160,17 +169,16 @@ function GoalCard({ goal, onDelete, onUpdated }) {
 
       {/* Recommendation card */}
       <RecommendationCard
-        kicker={`${progress}% of goal saved`}
+        kicker={`${progress}% of target saved`}
         accent="emerald"
-        headline={`Save ${inr(mcr)}/month to hit "${goal.name}" by ${targetLabel}`}
-        why="Required monthly contribution divides the remaining target gap evenly across the months left before your target date."
+        headline={`Contribute ${inr(mcr)}/month to hit "${goal.name}" by ${targetLabel}`}
+        why="Your required monthly deposit is mathematically calculated by dividing remaining target balance across months to deadline."
         numbers={[
-          { label: 'Goal Name',             value: goal.name },
-          { label: 'Target Amount',         value: inr(goal.target_amount) },
-          { label: 'Saved So Far',          value: inr(goal.current_amount) },
-          { label: 'Remaining Balance',     value: inr(remaining) },
-          { label: 'Months Remaining',      value: `${months} months` },
-          { label: 'Monthly Contribution',  value: `${inr(mcr)}/mo` },
+          { label: 'Goal Target',           value: inr(goal.target_amount) },
+          { label: 'Saved Balance',         value: inr(goal.current_amount) },
+          { label: 'Remaining Gap',         value: inr(remaining) },
+          { label: 'Months to Target',      value: `${months} months` },
+          { label: 'Required Deposit',      value: `${inr(mcr)}/month` },
         ]}
       />
     </div>
@@ -185,7 +193,7 @@ export default function GoalsPage() {
 
   const load = () =>
     api.getGoals()
-      .then((g) => { setGoals(g); setLoading(false) })
+      .then((g) => { setGoals(Array.isArray(g) ? g : []); setLoading(false) })
       .catch((e) => { setError(e.message); setLoading(false) })
 
   useEffect(() => { load() }, [])
@@ -212,7 +220,6 @@ export default function GoalsPage() {
     }
   }
 
-  /** Merge an updated goal from PUT response */
   const handleUpdated = (updated) => {
     if (!updated) return
     setGoals((prev) => prev.map((g) => (g.id === updated.id ? { ...g, ...updated } : g)))
@@ -225,13 +232,12 @@ export default function GoalsPage() {
       {/* Header */}
       <header className="page-header">
         <div className="page-kicker">
-          <span className="w-2 h-2 rounded-full bg-emerald-600" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           Target Projections
         </div>
         <h1 className="page-title">Savings Goals</h1>
         <p className="page-subtitle">
-          Define financial milestones. LPF back-calculates the exact monthly savings needed.
-          <strong className="text-slate-700"> Click ✏️ Edit to update any goal.</strong>
+          Define financial milestones. LPF deterministically back-calculates your exact monthly required allocation.
         </p>
       </header>
 
@@ -239,7 +245,7 @@ export default function GoalsPage() {
       <GoalForm onCreate={handleCreate} submitting={submitting} />
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl font-mono text-xs text-rose-700 font-bold">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold">
           ⚠️ {error}
         </div>
       )}
@@ -248,11 +254,11 @@ export default function GoalsPage() {
       <section className="space-y-6">
         {loading ? (
           <div className="space-y-4">
-            {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-32" />)}
+            {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-32 bg-slate-100 rounded-2xl" />)}
           </div>
         ) : goals.length === 0 ? (
           <EmptyState
-            icon="🎯"
+            icon={<Target className="w-8 h-8 text-slate-400" />}
             title="No savings goals defined"
             description="Add your first savings goal above to track exact required monthly contributions."
           />
@@ -260,23 +266,28 @@ export default function GoalsPage() {
           <>
             <div className="flex items-center justify-between">
               <h3 className="font-display text-xl font-bold text-slate-900">Active Goals</h3>
-              <Badge variant="emerald">{goals.length} Goals</Badge>
+              <Badge variant="emerald" dot>{goals.length} Goals Active</Badge>
             </div>
 
-            {goals.map((g) => (
-              <GoalCard
-                key={g.id}
-                goal={g}
-                onDelete={handleDelete}
-                onUpdated={handleUpdated}
-              />
-            ))}
+            <div className="space-y-6">
+              {goals.map((g) => (
+                <GoalCard
+                  key={g.id}
+                  goal={g}
+                  onDelete={handleDelete}
+                  onUpdated={handleUpdated}
+                />
+              ))}
+            </div>
 
             {goals.length > 1 && (
-              <Card hover={false} className="p-4 bg-emerald-50/70 border-emerald-200 flex items-center justify-between">
-                <p className="font-mono text-xs uppercase tracking-wider font-bold text-emerald-800">
-                  Total monthly commitment across {goals.length} goals
-                </p>
+              <Card hover={false} className="p-5 bg-gradient-to-r from-emerald-50/80 to-teal-50/50 border border-emerald-100 flex items-center justify-between shadow-card">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                    Total monthly commitment across {goals.length} goals
+                  </p>
+                  <p className="text-xs text-emerald-700 font-medium mt-0.5">Required to achieve all milestones on schedule</p>
+                </div>
                 <p className="font-display text-2xl font-extrabold text-emerald-700 tabular">
                   {inr(totalRequired)}/mo
                 </p>

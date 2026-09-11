@@ -15,12 +15,13 @@ function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   const d = payload[0].payload
   return (
-    <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-lg font-mono text-xs z-20">
-      <p className="text-slate-900 font-bold mb-1">{label}</p>
-      <p className="font-semibold" style={{ color: d.essential ? COLORS.essential : COLORS.discretionary }}>
-        {d.essential ? '● Essential' : '◉ Discretionary'}
-      </p>
-      <p className="text-slate-900 font-bold tabular mt-0.5">₹{Number(d.amount).toLocaleString('en-IN')}</p>
+    <div className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 shadow-xl text-xs space-y-1 z-30 font-body">
+      <p className="text-slate-900 font-bold text-sm mb-1">{label}</p>
+      <div className="flex items-center gap-1.5 font-medium" style={{ color: d.essential ? COLORS.essential : COLORS.discretionary }}>
+        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d.essential ? COLORS.essential : COLORS.discretionary }} />
+        <span>{d.essential ? 'Essential Need' : 'Discretionary Want'}</span>
+      </div>
+      <p className="text-slate-900 font-extrabold tabular text-sm mt-1">₹{Number(d.amount).toLocaleString('en-IN')}</p>
     </div>
   )
 }
@@ -30,7 +31,7 @@ export default function CategoryChart({ data = [] }) {
 
   if (sorted.length === 0) {
     return (
-      <div className="flex items-center justify-center h-52 text-slate-400 font-mono text-xs">
+      <div className="flex items-center justify-center h-56 text-slate-400 font-body text-xs">
         No spending breakdown data available.
       </div>
     )
@@ -42,11 +43,11 @@ export default function CategoryChart({ data = [] }) {
         <BarChart data={sorted} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
           <XAxis
             dataKey="category"
-            tick={{ fontSize: 10, fill: '#64748B', fontFamily: 'JetBrains Mono' }}
+            tick={{ fontSize: 10, fill: '#64748B', fontFamily: 'Plus Jakarta Sans' }}
             angle={-30}
             textAnchor="end"
             interval={0}
-            height={64}
+            height={60}
             axisLine={{ stroke: '#E2E8F0' }}
             tickLine={false}
           />
@@ -57,28 +58,28 @@ export default function CategoryChart({ data = [] }) {
             width={48}
             tickFormatter={inrK}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(15, 23, 42, 0.03)' }} />
-          <Bar dataKey="amount" radius={[6, 6, 0, 0]} maxBarSize={36}>
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.03)' }} />
+          <Bar dataKey="amount" radius={[6, 6, 2, 2]} maxBarSize={38}>
             {sorted.map((entry, i) => (
               <Cell
                 key={i}
                 fill={entry.essential === true ? COLORS.essential : COLORS.discretionary}
-                opacity={entry.essential === null ? 0.7 : 1}
               />
             ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <div className="flex items-center gap-4 mt-2 font-mono text-[11px] text-slate-500 justify-center">
-        <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-3 h-3 rounded bg-emerald-600 inline-block" />
-          Essential Expense
+      <div className="flex items-center gap-6 mt-3 text-xs text-slate-500 justify-center font-body">
+        <span className="flex items-center gap-2 font-medium">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" />
+          Essential Needs
         </span>
-        <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-3 h-3 rounded bg-amber-600 inline-block" />
-          Discretionary Spend
+        <span className="flex items-center gap-2 font-medium">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block" />
+          Discretionary Wants
         </span>
       </div>
     </div>
   )
 }
+

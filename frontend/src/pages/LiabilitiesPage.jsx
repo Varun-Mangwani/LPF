@@ -1,7 +1,18 @@
 import { useEffect, useState } from 'react'
+import {
+  ShieldAlert,
+  Flame,
+  Plus,
+  Trash2,
+  AlertCircle,
+  CreditCard,
+  Percent,
+  TrendingDown,
+  Info,
+} from 'lucide-react'
 import { api } from '../api/client.js'
 import LiabilityRankCard from '../components/LiabilityRankCard.jsx'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Select } from '../components/ui/Select'
 import { Button } from '../components/ui/Button'
@@ -17,11 +28,12 @@ const TYPES = [
 ]
 
 function AddLiabilityForm({ onCreate, submitting }) {
-  const [name,     setName]     = useState('')
-  const [type,     setType]     = useState('card')
-  const [balance,  setBalance]  = useState('')
-  const [rate,     setRate]     = useState('')
-  const [minPay,   setMinPay]   = useState('')
+  const [isOpen,    setIsOpen]    = useState(false)
+  const [name,      setName]      = useState('')
+  const [type,      setType]      = useState('card')
+  const [balance,   setBalance]   = useState('')
+  const [rate,      setRate]      = useState('')
+  const [minPay,    setMinPay]    = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -37,83 +49,100 @@ function AddLiabilityForm({ onCreate, submitting }) {
     setBalance('')
     setRate('')
     setMinPay('')
+    setIsOpen(false)
   }
 
   return (
-    <Card hover={false}>
-      <CardHeader>
-        <CardTitle>Add Debt / Credit Card Liability</CardTitle>
-      </CardHeader>
+    <Card hover={false} className="border-slate-200/80 bg-white shadow-card">
+      <div className="flex items-center justify-between">
+        <div>
+          <CardTitle>Add Debt / Credit Card Liability</CardTitle>
+          <CardDescription>Include credit cards, personal loans, or consumer credit</CardDescription>
+        </div>
+        <Button
+          onClick={() => setIsOpen((v) => !v)}
+          variant={isOpen ? 'secondary' : 'primary'}
+          size="sm"
+          leftIcon={isOpen ? null : <Plus className="w-4 h-4" />}
+        >
+          {isOpen ? 'Cancel' : 'Add Liability'}
+        </Button>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <CardContent className="space-y-4">
-          <Input
-            label="Liability Name"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. HDFC Credit Card, Car Loan"
-          />
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Select
-              label="Type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              options={TYPES}
-            />
-
+      {isOpen && (
+        <form onSubmit={handleSubmit} className="space-y-4 mt-6 pt-5 border-t border-slate-100 animate-slide-down">
+          <CardContent className="space-y-4 p-0">
             <Input
-              label="Outstanding Balance (₹)"
+              label="Liability / Creditor Name"
               required
-              type="number"
-              min="1"
-              leftIcon="₹"
-              value={balance}
-              onChange={(e) => setBalance(e.target.value)}
-              placeholder="50000"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. HDFC Millennia Card, Car Loan"
             />
 
-            <Input
-              label="Annual Interest Rate (%)"
-              required
-              type="number"
-              min="0"
-              step="0.1"
-              rightIcon="%"
-              value={rate}
-              onChange={(e) => setRate(e.target.value)}
-              placeholder="36"
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Select
+                label="Liability Type"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                options={TYPES}
+              />
 
-            <Input
-              label="Min. Monthly Payment (₹)"
-              type="number"
-              min="0"
-              leftIcon="₹"
-              value={minPay}
-              onChange={(e) => setMinPay(e.target.value)}
-              placeholder="2500"
-            />
-          </div>
+              <Input
+                label="Outstanding Balance (₹)"
+                required
+                type="number"
+                min="1"
+                leftIcon={<span className="text-xs font-bold text-slate-400">₹</span>}
+                value={balance}
+                onChange={(e) => setBalance(e.target.value)}
+                placeholder="50000"
+              />
 
-          {balance && rate && (
-            <div className="bg-rose-50 border border-rose-200/80 rounded-xl p-3 font-mono text-xs text-slate-700">
-              True Annual Cost Preview:{' '}
-              <span className="text-rose-600 font-bold">
-                {inr(Number(balance) * (Number(rate) / 100))}/yr
-              </span>
-              {' '}at {rate}% APR on {inr(balance)}
+              <Input
+                label="Annual APR Interest Rate (%)"
+                required
+                type="number"
+                min="0"
+                step="0.1"
+                rightIcon={<Percent className="w-3.5 h-3.5" />}
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                placeholder="36"
+              />
+
+              <Input
+                label="Min. Monthly Payment (₹)"
+                type="number"
+                min="0"
+                leftIcon={<span className="text-xs font-bold text-slate-400">₹</span>}
+                value={minPay}
+                onChange={(e) => setMinPay(e.target.value)}
+                placeholder="2500"
+              />
             </div>
-          )}
-        </CardContent>
 
-        <CardFooter className="mt-4 pt-4 border-t border-slate-100">
-          <Button type="submit" variant="danger" isLoading={submitting}>
-            {submitting ? 'Adding...' : 'Add Liability →'}
-          </Button>
-        </CardFooter>
-      </form>
+            {balance && rate && (
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3.5 text-xs text-slate-700 shadow-subtle">
+                <span className="text-slate-500">True Annual Interest Bleed: </span>
+                <span className="text-rose-600 font-extrabold tabular text-sm">
+                  {inr(Number(balance) * (Number(rate) / 100))}/year
+                </span>
+                <span className="text-slate-500"> at {rate}% APR on {inr(balance)}</span>
+              </div>
+            )}
+          </CardContent>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <Button type="button" variant="ghost" onClick={() => setIsOpen(false)} size="sm">
+              Cancel
+            </Button>
+            <Button type="submit" variant="danger" isLoading={submitting} size="sm">
+              {submitting ? 'Adding...' : 'Save Liability'}
+            </Button>
+          </div>
+        </form>
+      )}
     </Card>
   )
 }
@@ -156,6 +185,7 @@ export default function LiabilitiesPage() {
     }
   }
 
+  const totalBalance  = liabilities.reduce((s, l) => s + (l.balance || 0), 0)
   const totalInterest = liabilities.reduce((s, l) => s + (l.true_annual_cost || 0), 0)
 
   return (
@@ -163,21 +193,53 @@ export default function LiabilitiesPage() {
       {/* Header */}
       <header className="page-header">
         <div className="page-kicker">
-          <span className="w-2 h-2 rounded-full bg-rose-600" />
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
           Debt Avalanche Engine
         </div>
-        <h1 className="page-title">Liabilities & Debt Ranking</h1>
+        <h1 className="page-title">Liabilities & Debt Optimization</h1>
         <p className="page-subtitle">
-          Liabilities ranked by true annual interest cost (balance × APR). The Debt Avalanche method prioritizes paying highest-rate debt first to minimize total interest paid.
+          Liabilities ranked strictly by APR to minimize total wealth loss. The mathematical Avalanche strategy eliminates the highest-rate burden first.
         </p>
       </header>
 
-      {/* Add form */}
+      {/* Debt Avalanche Hero Banner */}
+      <div className="relative rounded-3xl bg-gradient-to-r from-rose-50/90 via-white to-amber-50/60 border border-rose-100 p-6 sm:p-7 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-6 overflow-hidden">
+        <div className="pointer-events-none absolute right-0 top-0 w-64 h-64 bg-rose-200/20 rounded-full blur-3xl" />
+        
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Flame className="w-4 h-4 text-rose-600" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-rose-700">
+              Total Debt Burden
+            </span>
+          </div>
+          <div className="flex items-baseline gap-3">
+            <span className="font-display text-3xl font-black text-slate-900 tabular">
+              {inr(totalBalance)}
+            </span>
+            <span className="text-xs text-rose-600 font-bold">
+              Bleeding {inr(totalInterest)}/yr in APR
+            </span>
+          </div>
+          <p className="text-xs text-slate-600 mt-1 max-w-md leading-relaxed">
+            Direct any excess monthly surplus toward Rank #1 to halt compounding interest immediately.
+          </p>
+        </div>
+
+        <div className="shrink-0 flex items-center gap-3">
+          <Badge variant="rose" size="lg" dot>
+            {liabilities.length} Active Debts
+          </Badge>
+        </div>
+      </div>
+
+      {/* Add Form */}
       <AddLiabilityForm onCreate={handleCreate} submitting={submitting} />
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl font-mono text-xs text-rose-700 font-bold">
-          ⚠️ {error}
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -185,42 +247,36 @@ export default function LiabilitiesPage() {
       <section className="space-y-6">
         {loading ? (
           <div className="space-y-4">
-            {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-36" />)}
+            {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-36 bg-slate-100 rounded-2xl" />)}
           </div>
         ) : liabilities.length === 0 ? (
           <EmptyState
-            icon="💳"
+            icon={<CreditCard className="w-8 h-8 text-slate-400" />}
             title="No liabilities added"
-            description="Add your credit cards or personal loans to generate an automated Debt Avalanche payoff strategy."
+            description="Add your credit cards or loans to calculate your Debt Avalanche payoff schedule and savings."
           />
         ) : (
           <>
             <div className="flex items-center justify-between">
               <h3 className="font-display text-xl font-bold text-slate-900">Priority Ranked Liabilities</h3>
-              <Badge variant="rose">{liabilities.length} Debts</Badge>
+              <span className="text-xs text-slate-500">Sorted by APR (Highest to Lowest)</span>
             </div>
 
-            {liabilities.map((l) => (
-              <div key={l.id} className="relative group">
-                <button
-                  onClick={() => handleDelete(l.id)}
-                  className="absolute top-3 right-3 z-10 font-mono text-xs text-slate-400 hover:text-rose-600 transition-colors p-1"
-                  title="Remove liability"
-                >
-                  ✕ Remove
-                </button>
-                <LiabilityRankCard liability={l} />
-              </div>
-            ))}
-
-            {liabilities.length > 0 && (
-              <Card hover={false} className="p-4 bg-rose-50/80 border-rose-200 flex items-center justify-between">
-                <p className="font-mono text-xs uppercase tracking-wider font-bold text-rose-800">
-                  Total annual interest outflow across all debts
-                </p>
-                <p className="font-display text-2xl font-extrabold text-rose-700 tabular">{inr(totalInterest)}/yr</p>
-              </Card>
-            )}
+            <div className="space-y-4">
+              {liabilities.map((l) => (
+                <div key={l.id} className="relative group">
+                  <button
+                    onClick={() => handleDelete(l.id)}
+                    className="absolute top-4 right-4 z-10 text-xs text-slate-400 hover:text-rose-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100 flex items-center gap-1"
+                    title="Remove liability"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </button>
+                  <LiabilityRankCard liability={l} />
+                </div>
+              ))}
+            </div>
           </>
         )}
       </section>

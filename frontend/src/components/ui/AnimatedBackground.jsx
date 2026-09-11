@@ -6,7 +6,7 @@ export function AnimatedBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
       {/* 1. Base Gradient Canvas */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-indigo-50/50" />
 
       {/* 2. Animated Gradient Orbs */}
       <motion.div
@@ -21,7 +21,7 @@ export function AnimatedBackground() {
           repeatType: 'mirror',
           ease: 'easeInOut',
         }}
-        className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-indigo-600/30 blur-3xl"
+        className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-indigo-200/40 blur-3xl"
       />
 
       <motion.div
@@ -36,7 +36,7 @@ export function AnimatedBackground() {
           repeatType: 'mirror',
           ease: 'easeInOut',
         }}
-        className="absolute top-1/3 -right-32 w-[28rem] h-[28rem] rounded-full bg-amber-500/20 blur-3xl"
+        className="absolute top-1/3 -right-32 w-[28rem] h-[28rem] rounded-full bg-amber-200/30 blur-3xl"
       />
 
       <motion.div
@@ -51,14 +51,14 @@ export function AnimatedBackground() {
           repeatType: 'mirror',
           ease: 'easeInOut',
         }}
-        className="absolute bottom-10 left-1/4 w-[32rem] h-[32rem] rounded-full bg-emerald-500/20 blur-3xl"
+        className="absolute bottom-10 left-1/4 w-[32rem] h-[32rem] rounded-full bg-emerald-200/30 blur-3xl"
       />
 
       {/* 3. Grid Pattern Overlay */}
       <div
-        className="absolute inset-0 opacity-[0.12]"
+        className="absolute inset-0 opacity-[0.4]"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.4) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.3) 1px, transparent 0)`,
           backgroundSize: '36px 36px',
         }}
       />

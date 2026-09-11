@@ -1,8 +1,21 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
+import {
+  Search,
+  Filter,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Edit2,
+  Check,
+  X,
+  CreditCard,
+  RefreshCw,
+  Sparkles,
+  Layers,
+  Calendar,
+} from 'lucide-react'
 import { api } from '../api/client.js'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table'
 import { Input } from '../components/ui/Input'
-import { Select } from '../components/ui/Select'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { Card } from '../components/ui/Card'
@@ -38,7 +51,7 @@ function getMonths(txns) {
   return months
 }
 
-/** Single row with inline PATCH editing */
+/** Single row with inline editing */
 function TransactionRow({ txn, onPatch }) {
   const isCredit   = txn.type === 'credit'
   const [editing,  setEditing]  = useState(false)
@@ -68,19 +81,32 @@ function TransactionRow({ txn, onPatch }) {
     setEditing(false)
   }
 
+  const merchantInitials = (txn.merchant || 'TX').slice(0, 2).toUpperCase()
+
   return (
-    <TableRow className={editing ? 'bg-indigo-50/50 ring-2 ring-inset ring-indigo-200' : ''}>
+    <TableRow className={editing ? 'bg-indigo-50/60 border-indigo-200/80' : ''}>
       {/* Date */}
-      <TableCell className="font-mono text-xs text-slate-500 whitespace-nowrap">
+      <TableCell className="tabular text-xs text-slate-500 whitespace-nowrap">
         {dateStr}
       </TableCell>
 
       {/* Merchant */}
       <TableCell>
-        <p className="font-body text-sm font-bold text-slate-900 leading-tight">{txn.merchant}</p>
-        {txn.description && txn.description !== txn.merchant && (
-          <p className="font-mono text-[11px] text-slate-400 truncate max-w-xs mt-0.5">{txn.description}</p>
-        )}
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-xs font-bold text-slate-700 shrink-0 shadow-subtle">
+            {merchantInitials}
+          </div>
+          <div className="min-w-0">
+            <p className="font-body text-sm font-semibold text-slate-900 leading-tight truncate">
+              {txn.merchant}
+            </p>
+            {txn.description && txn.description !== txn.merchant && (
+              <p className="font-body text-xs text-slate-500 truncate max-w-xs mt-0.5">
+                {txn.description}
+              </p>
+            )}
+          </div>
+        </div>
       </TableCell>
 
       {/* Category — inline editable */}
@@ -89,10 +115,10 @@ function TransactionRow({ txn, onPatch }) {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="border border-indigo-400 rounded-lg px-2 py-1 font-mono text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
+            className="bg-white border border-indigo-300 rounded-lg px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-sm"
           >
             {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c} className="bg-white text-slate-900">{c}</option>
             ))}
           </select>
         ) : (
@@ -101,36 +127,36 @@ function TransactionRow({ txn, onPatch }) {
       </TableCell>
 
       {/* Amount */}
-      <TableCell className="text-right font-mono text-xs sm:text-sm tabular font-bold whitespace-nowrap">
-        <span className={isCredit ? 'text-emerald-700' : 'text-slate-900'}>
+      <TableCell className="text-right tabular font-bold text-sm whitespace-nowrap">
+        <span className={isCredit ? 'text-emerald-600 font-extrabold' : 'text-slate-900'}>
           {isCredit ? '+' : '−'}{inr(Math.abs(txn.amount))}
         </span>
       </TableCell>
 
-      {/* Essential toggle — inline editable */}
+      {/* Essential / AI Flags */}
       <TableCell>
         <div className="flex items-center gap-1.5 flex-wrap">
           {editing ? (
-            <label className="flex items-center gap-1.5 cursor-pointer select-none">
+            <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-slate-600">
               <input
                 type="checkbox"
                 checked={essential}
                 onChange={(e) => setEssential(e.target.checked)}
                 className="w-4 h-4 accent-indigo-600 rounded"
               />
-              <span className="font-mono text-[11px] text-slate-700">Essential</span>
+              <span>Essential</span>
             </label>
           ) : (
             <>
               {txn.is_recurring && (
-                <Badge variant="indigo" size="sm" title="Recurring subscription">⟳ Sub</Badge>
+                <Badge variant="indigo" size="sm">Recurring</Badge>
               )}
               {txn.is_essential && (
                 <Badge variant="emerald" size="sm">Essential</Badge>
               )}
               {txn.categorized_by && (
-                <Badge variant="slate" size="sm" title={`Categorized by: ${txn.categorized_by}`}>
-                  {txn.categorized_by === 'rule' ? 'Rule' : txn.categorized_by === 'llm' ? 'AI' : txn.categorized_by === 'manual' ? '✏️ Manual' : txn.categorized_by}
+                <Badge variant="slate" size="sm">
+                  {txn.categorized_by === 'rule' ? 'Rule' : txn.categorized_by === 'llm' ? '✨ AI' : txn.categorized_by}
                 </Badge>
               )}
             </>
@@ -145,24 +171,25 @@ function TransactionRow({ txn, onPatch }) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="font-mono text-[11px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1 rounded-lg transition-colors disabled:opacity-50"
+              className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 px-2.5 py-1 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1 shadow-sm"
             >
-              {saving ? '…' : 'Save'}
+              <Check className="w-3 h-3" />
+              <span>{saving ? '…' : 'Save'}</span>
             </button>
             <button
               onClick={handleCancel}
-              className="font-mono text-[11px] font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-colors"
+              className="text-xs text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-2 py-1 rounded-lg transition-colors"
             >
-              Cancel
+              <X className="w-3 h-3" />
             </button>
           </div>
         ) : (
           <button
             onClick={() => setEditing(true)}
-            className="font-mono text-[10px] text-slate-400 hover:text-indigo-600 transition-colors p-1 rounded-md hover:bg-indigo-50"
-            title="Edit category / essential flag"
+            className="text-slate-400 hover:text-indigo-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+            title="Edit category or flags"
           >
-            ✏️
+            <Edit2 className="w-3.5 h-3.5" />
           </button>
         )}
       </TableCell>
@@ -181,13 +208,12 @@ export default function TransactionsPage() {
   const loadTxns = useCallback(() => {
     setLoading(true)
     api.getTransactions()
-      .then((t) => { setTxns(t); setLoading(false) })
+      .then((t) => { setTxns(Array.isArray(t) ? t : []); setLoading(false) })
       .catch((e) => { setError(e.message); setLoading(false) })
   }, [])
 
   useEffect(() => { loadTxns() }, [loadTxns])
 
-  /** Merge a patched transaction back into the list without full reload */
   const handlePatch = useCallback((updated) => {
     if (!updated) return
     setTxns((prev) => prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t)))
@@ -215,30 +241,63 @@ export default function TransactionsPage() {
   const hasFilters = catFilter || monthFilter || search
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in pb-12">
+    <div className="space-y-6 animate-fade-in pb-12">
       {/* Header */}
       <header className="page-header">
         <div className="page-kicker">
-          <span className="w-2 h-2 rounded-full bg-indigo-600" />
-          Ledger Explorer
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          Ledger Records
         </div>
         <h1 className="page-title">Transactions Ledger</h1>
         <p className="page-subtitle">
-          Search, filter, and <strong>inline-edit</strong> transaction categories and essential flags.
-          Auto-categorized via deterministic rules and AI.
+          Search, filter, and inline-edit transaction categories and essential flags. Auto-categorized via deterministic rules & AI.
         </p>
       </header>
 
-      {/* Filter Toolbar */}
+      {/* Summary KPI Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card hover={false} className="p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Total Filtered</p>
+            <p className="font-display text-2xl font-extrabold text-slate-900 tabular mt-0.5">{filtered.length}</p>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shadow-subtle">
+            <Layers className="w-5 h-5" />
+          </div>
+        </Card>
+
+        <Card hover={false} className="p-4 flex items-center justify-between border-rose-100">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Total Outflow</p>
+            <p className="font-display text-2xl font-extrabold text-rose-600 tabular mt-0.5">{inr(totalDebit)}</p>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shadow-subtle">
+            <ArrowDownLeft className="w-5 h-5" />
+          </div>
+        </Card>
+
+        <Card hover={false} className="p-4 flex items-center justify-between border-emerald-100">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Total Inflow</p>
+            <p className="font-display text-2xl font-extrabold text-emerald-600 tabular mt-0.5">{inr(totalCredit)}</p>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shadow-subtle">
+            <ArrowUpRight className="w-5 h-5" />
+          </div>
+        </Card>
+      </div>
+
+      {/* Search & Filter Toolbar */}
       <Card hover={false} className="p-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-3 items-end">
           <div className="sm:col-span-2">
             <Input
               type="search"
-              placeholder="Search merchant or category..."
+              placeholder="Search merchant, description, or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               id="txn-search"
+              leftIcon={<Search className="w-4 h-4 text-slate-400" />}
             />
           </div>
 
@@ -246,11 +305,11 @@ export default function TransactionsPage() {
             value={catFilter}
             onChange={(e) => setCatFilter(e.target.value)}
             id="txn-category-filter"
-            className="border border-slate-300 rounded-xl px-3.5 py-2.5 font-mono text-xs bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none text-slate-700"
+            className="bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 focus:outline-none shadow-subtle"
           >
-            <option value="">All Categories</option>
+            <option value="" className="bg-white">All Categories</option>
             {CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c} className="bg-white">{c}</option>
             ))}
           </select>
 
@@ -259,10 +318,10 @@ export default function TransactionsPage() {
               value={monthFilter}
               onChange={(e) => setMonthFilter(e.target.value)}
               id="txn-month-filter"
-              className="flex-1 border border-slate-300 rounded-xl px-3.5 py-2.5 font-mono text-xs bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none text-slate-700"
+              className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 focus:outline-none shadow-subtle"
             >
-              <option value="">All Months</option>
-              {months.map((m) => <option key={m} value={m}>{m}</option>)}
+              <option value="" className="bg-white">All Months</option>
+              {months.map((m) => <option key={m} value={m} className="bg-white">{m}</option>)}
             </select>
             {hasFilters && (
               <Button onClick={clearFilters} variant="secondary" size="md">Clear</Button>
@@ -271,41 +330,27 @@ export default function TransactionsPage() {
         </div>
       </Card>
 
-      {/* Summary strip */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card hover={false} className="p-4 text-center">
-          <p className="font-display text-2xl font-extrabold text-slate-900 tabular">{filtered.length}</p>
-          <p className="font-mono text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">Transactions</p>
-        </Card>
-        <Card hover={false} className="p-4 text-center border-l-4 border-l-rose-600">
-          <p className="font-display text-2xl font-extrabold text-rose-600 tabular">{inr(totalDebit)}</p>
-          <p className="font-mono text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">Total Outflow</p>
-        </Card>
-        <Card hover={false} className="p-4 text-center border-l-4 border-l-emerald-600">
-          <p className="font-display text-2xl font-extrabold text-emerald-700 tabular">{inr(totalCredit)}</p>
-          <p className="font-mono text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">Total Inflow</p>
-        </Card>
+      {/* Interactive Helper Hint */}
+      <div className="flex items-center gap-2.5 text-xs text-slate-600 bg-indigo-50/80 border border-indigo-100/90 rounded-2xl px-4 py-3 shadow-subtle">
+        <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+        <span>
+          Click the <strong className="text-indigo-700 font-semibold">pencil icon</strong> on any row to recategorize or toggle essential status. Changes update your 50/30/20 budget calculations immediately.
+        </span>
       </div>
 
-      {/* Edit hint */}
-      <div className="flex items-center gap-2 text-xs font-mono text-slate-500 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5">
-        <span>✏️</span>
-        <span>Click the <strong className="text-indigo-700">pencil icon</strong> on any row to recategorize or toggle essential status. Changes are saved to the backend immediately.</span>
-      </div>
-
-      {/* Table */}
+      {/* Table Content */}
       {loading ? (
         <div className="space-y-3">
-          {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-12" />)}
+          {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-12 bg-slate-100 rounded-xl" />)}
         </div>
       ) : error ? (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl font-mono text-xs text-rose-700 font-bold">
-          ⚠️ {error}
-          <Button onClick={loadTxns} variant="secondary" size="sm" className="ml-3">Retry</Button>
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-700 font-semibold flex items-center justify-between">
+          <span>⚠️ {error}</span>
+          <Button onClick={loadTxns} variant="secondary" size="sm">Retry</Button>
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon="💳"
+          icon={<CreditCard className="w-8 h-8 text-slate-400" />}
           title="No transactions found"
           description={txns.length === 0
             ? 'No transactions in ledger yet. Import a bank statement first.'
@@ -321,11 +366,11 @@ export default function TransactionsPage() {
           <TableHeader>
             <TableRow hover={false}>
               <TableHead>Date</TableHead>
-              <TableHead>Merchant / Description</TableHead>
+              <TableHead>Merchant & Description</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>Flags</TableHead>
-              <TableHead className="text-right">Edit</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

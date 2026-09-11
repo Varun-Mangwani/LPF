@@ -4,15 +4,30 @@ import { api } from '../api/client.js'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
-
-// Accepted file formats
-const ACCEPTED = ['.csv']
+import { Input } from '../components/ui/Input'
+import {
+  UploadCloud,
+  CheckCircle2,
+  FileText,
+  Sparkles,
+  ArrowRight,
+  ArrowLeft,
+  RotateCcw,
+  ShieldCheck,
+  AlertCircle,
+  X,
+  Layers,
+  Cpu,
+  Database,
+  Calendar,
+  Wallet
+} from 'lucide-react'
 
 function StepIndicator({ step }) {
   const steps = [
     { num: 1, label: 'Profile' },
-    { num: 2, label: 'Goal' },
-    { num: 3, label: 'Statement' },
+    { num: 2, label: 'Target Goal' },
+    { num: 3, label: 'Bank Statement' },
   ]
   return (
     <div className="flex items-center justify-center gap-2 mb-8">
@@ -20,18 +35,18 @@ function StepIndicator({ step }) {
         <div key={s.num} className="flex items-center gap-2">
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-mono text-xs font-bold transition-all ${
             step === s.num
-              ? 'bg-indigo-600 text-white shadow-md ring-4 ring-indigo-500/20'
+              ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-500/30'
               : step > s.num
-              ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
               : 'bg-slate-100 text-slate-400 border border-slate-200'
           }`}>
-            {step > s.num ? '✓' : s.num}
+            {step > s.num ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : s.num}
           </div>
-          <span className={`font-mono text-[11px] font-semibold hidden sm:block ${
-            step === s.num ? 'text-indigo-700' : step > s.num ? 'text-emerald-700' : 'text-slate-400'
+          <span className={`font-mono text-xs font-medium hidden sm:block ${
+            step === s.num ? 'text-slate-900 font-bold' : step > s.num ? 'text-emerald-700' : 'text-slate-400'
           }`}>{s.label}</span>
           {i < steps.length - 1 && (
-            <div className={`w-8 h-1 rounded-full mx-1 ${step > s.num ? 'bg-emerald-400' : 'bg-slate-200'}`} />
+            <div className={`w-8 h-0.5 rounded-full mx-1 ${step > s.num ? 'bg-emerald-400' : 'bg-slate-200'}`} />
           )}
         </div>
       ))}
@@ -41,37 +56,37 @@ function StepIndicator({ step }) {
 
 function UploadResult({ result, onContinue }) {
   const stats = [
-    { label: 'Rows Inserted',        value: result.inserted,            color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
-    { label: 'Categorized by Rules', value: result.categorized_by_rule, color: 'text-indigo-700',  bg: 'bg-indigo-50 border-indigo-200' },
-    { label: 'Categorized by AI',    value: result.categorized_by_llm,  color: 'text-amber-700',   bg: 'bg-amber-50 border-amber-200' },
-    { label: 'Recurring Detected',   value: result.recurring_detected,  color: 'text-slate-700',   bg: 'bg-slate-100 border-slate-200' },
+    { label: 'Rows Inserted',        value: result.inserted,            color: 'text-emerald-700', bg: 'bg-emerald-50/70 border-emerald-200' },
+    { label: 'Categorized by Rules', value: result.categorized_by_rule, color: 'text-indigo-700',  bg: 'bg-indigo-50/70 border-indigo-200' },
+    { label: 'Categorized by LLM',   value: result.categorized_by_llm,  color: 'text-amber-800',   bg: 'bg-amber-50/70 border-amber-200' },
+    { label: 'Recurring Detected',   value: result.recurring_detected,  color: 'text-purple-700',  bg: 'bg-purple-50/70 border-purple-200' },
   ]
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in p-2">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto mb-3 shadow-sm">
-          ✅
+        <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto mb-3 shadow-subtle">
+          <CheckCircle2 className="w-7 h-7" />
         </div>
-        <h2 className="font-display text-2xl font-extrabold text-slate-900 tracking-tight">
-          Statement Imported Successfully
+        <h2 className="font-display text-2xl font-bold text-slate-900 tracking-tight">
+          Statement Ingested & Classified
         </h2>
         <p className="font-mono text-xs text-slate-500 mt-1 uppercase tracking-wider">
-          LPF has analysed and categorised your transactions
+          High-precision rule engine & deterministic categorization complete
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {stats.map(({ label, value, color, bg }) => (
-          <div key={label} className={`rounded-2xl border p-4 text-center ${bg}`}>
-            <p className={`font-display text-3xl font-extrabold tabular ${color}`}>{value}</p>
-            <p className="font-mono text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-1">{label}</p>
+          <div key={label} className={`rounded-2xl border p-4 text-center shadow-subtle ${bg}`}>
+            <p className={`font-mono text-3xl font-extrabold tabular ${color}`}>{value}</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-slate-600 font-bold mt-1">{label}</p>
           </div>
         ))}
       </div>
 
-      <Button onClick={onContinue} variant="primary" size="lg" className="w-full justify-center">
-        View Dashboard →
+      <Button onClick={onContinue} variant="primary" size="lg" className="w-full justify-center" icon={ArrowRight}>
+        Launch Executive Dashboard
       </Button>
     </div>
   )
@@ -95,10 +110,10 @@ function DragDropZone({ file, onFile }) {
     <div
       className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${
         dragging
-          ? 'border-indigo-500 bg-indigo-50/80 scale-[1.01]'
+          ? 'border-indigo-500 bg-indigo-50 scale-[1.01] shadow-sm'
           : file
-          ? 'border-emerald-400 bg-emerald-50/60'
-          : 'border-slate-300 hover:border-indigo-400 bg-slate-50/50 hover:bg-indigo-50/20'
+          ? 'border-emerald-400 bg-emerald-50/40 shadow-subtle'
+          : 'border-slate-300 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/30'
       }`}
       onDrop={onDrop}
       onDragOver={onDragOver}
@@ -112,26 +127,28 @@ function DragDropZone({ file, onFile }) {
         className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f) }}
       />
-      <div className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold mb-3 transition-all ${
-        file ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-50 text-indigo-600 border border-indigo-200'
+      <div className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-3 transition-all shadow-subtle ${
+        file
+          ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+          : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
       }`}>
-        {file ? '📄' : '↑'}
+        {file ? <FileText className="w-7 h-7" /> : <UploadCloud className="w-7 h-7" />}
       </div>
-      <p className="font-mono text-sm font-bold text-slate-900">
-        {file ? file.name : 'Drop CSV here or click to browse'}
+      <p className="font-display text-sm font-semibold text-slate-900">
+        {file ? file.name : 'Drop bank statement CSV here or browse files'}
       </p>
       <p className="font-mono text-xs text-slate-500 mt-1">
         {file
-          ? `${(file.size / 1024).toFixed(1)} KB — ready to upload`
-          : 'Supports SBI, HDFC, ICICI and any standard CSV bank statement'}
+          ? `${(file.size / 1024).toFixed(1)} KB • Ready for deterministic ingestion`
+          : 'Supports HDFC, ICICI, SBI, Axis and standard CSV exports'}
       </p>
       {file && (
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onFile(null) }}
-          className="mt-2 font-mono text-xs text-rose-500 hover:text-rose-700 transition-colors"
+          className="mt-3 inline-flex items-center gap-1 font-mono text-xs text-rose-600 hover:text-rose-700 font-semibold transition-colors"
         >
-          ✕ Remove file
+          <X className="w-3.5 h-3.5" /> Remove file
         </button>
       )}
     </div>
@@ -151,12 +168,9 @@ export default function UploadPage() {
   const [error,      setError]      = useState('')
   const [uploadResult, setUploadResult] = useState(null)
 
-  /* ── helpers ──────────────────────────────────────────── */
   const goToDashboard = () => navigate('/dashboard')
-
   const handleSkipDemo = () => navigate('/dashboard')
 
-  /* ── Step handlers ────────────────────────────────────── */
   const handleNextStep1 = (e) => { e.preventDefault(); setStep(2) }
 
   const handleNextStep2 = async (e) => {
@@ -200,58 +214,52 @@ export default function UploadPage() {
     }
   }
 
-  /* ── render ───────────────────────────────────────────── */
   return (
-    <div className="max-w-3xl mx-auto py-4 px-4 animate-fade-in pb-12">
+    <div className="max-w-3xl mx-auto py-6 px-4 animate-fade-in pb-16">
       {/* Brand Header */}
       <div className="text-center mb-8">
-        <img src="/lpf_logo.jpg" alt="LPF" className="w-14 h-14 mx-auto mb-3 rounded-xl shadow-md object-contain bg-white border border-slate-200" />
+        <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shadow-subtle">
+          <Wallet className="w-7 h-7 text-indigo-600" />
+        </div>
         <h1 className="font-display text-3xl font-extrabold text-slate-900 tracking-tight">
-          Welcome to Ledger Personal Finance
+          Ledger Onboarding & Ingestion
         </h1>
         <p className="font-mono text-xs uppercase tracking-wider text-slate-500 font-semibold mt-1">
-          Import your bank statement · LPF categorises everything automatically
+          Self-hosted • Deterministic calculations • Zero cloud telemetry
         </p>
         <StepIndicator step={step} />
       </div>
 
       {/* ── Step 1: Income ───── */}
       {step === 1 && (
-        <Card className="animate-fade-in" hover={false}>
+        <Card className="animate-fade-in border-slate-200/80 bg-white shadow-card" hover={false}>
           <CardHeader>
-            <Badge variant="indigo" className="w-fit mb-2">Step 01 of 03</Badge>
-            <CardTitle>Monthly Income Target</CardTitle>
+            <Badge variant="indigo" size="sm" className="w-fit mb-2">Step 01 of 03</Badge>
+            <CardTitle>Baseline Monthly Net Inflow</CardTitle>
             <CardDescription>
-              LPF uses your take-home income to validate the 50/30/20 budget rule and calculate cashflow health.
+              We calibrate the 50/30/20 budget framework, emergency cushion days, and daily safe-to-spend limits against your regular post-tax take-home.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleNextStep1}>
             <CardContent className="space-y-4">
-              <div>
-                <label className="font-mono text-xs uppercase tracking-wider text-slate-700 font-bold block mb-2">
-                  Expected Monthly Net Income (₹)
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-sm text-slate-500 font-bold">₹</span>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    value={income}
-                    onChange={(e) => setIncome(e.target.value)}
-                    placeholder="85000"
-                    className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl font-mono text-sm focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none bg-white"
-                  />
-                </div>
-                <p className="font-mono text-[11px] text-slate-500 mt-1.5">Enter your net take-home monthly income</p>
-              </div>
+              <Input
+                label="Monthly Post-Tax Income (₹)"
+                required
+                type="number"
+                min="1"
+                leftIcon="₹"
+                value={income}
+                onChange={(e) => setIncome(e.target.value)}
+                placeholder="85000"
+                helperText="Enter your estimated average monthly salary or recurring consulting income"
+              />
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex justify-between items-center border-t border-slate-100 pt-4">
               <Button type="button" variant="secondary" onClick={handleSkipDemo} size="sm">
                 Skip to Demo Data
               </Button>
-              <Button type="submit" variant="primary">
-                Next: Define Goal →
+              <Button type="submit" variant="primary" icon={ArrowRight}>
+                Next: Set Primary Goal
               </Button>
             </CardFooter>
           </form>
@@ -260,58 +268,51 @@ export default function UploadPage() {
 
       {/* ── Step 2: Goal ───── */}
       {step === 2 && (
-        <Card className="animate-fade-in" hover={false}>
+        <Card className="animate-fade-in border-slate-200/80 bg-white shadow-card" hover={false}>
           <CardHeader>
-            <Badge variant="amber" className="w-fit mb-2">Step 02 of 03</Badge>
-            <CardTitle>Primary Savings Goal</CardTitle>
+            <Badge variant="amber" size="sm" className="w-fit mb-2">Step 02 of 03</Badge>
+            <CardTitle>Anchor Savings Milestone</CardTitle>
             <CardDescription>
-              LPF's deterministic engine back-calculates the exact monthly savings needed to hit your target by deadline.
+              The engine back-calculates required monthly contributions and tests feasibility against your daily surplus.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleNextStep2}>
             <CardContent className="space-y-4">
-              <div>
-                <label className="font-mono text-xs uppercase tracking-wider text-slate-700 font-bold block mb-2">Goal Name</label>
-                <input
-                  type="text"
+              <Input
+                label="Milestone Target Name"
+                required
+                type="text"
+                value={goalName}
+                onChange={(e) => setGoalName(e.target.value)}
+                placeholder="e.g. Emergency Reserve Fund"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Target Amount (₹)"
                   required
-                  value={goalName}
-                  onChange={(e) => setGoalName(e.target.value)}
-                  placeholder="e.g. Emergency Reserve Fund"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl font-body text-sm focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none bg-white"
+                  type="number"
+                  min="1"
+                  leftIcon="₹"
+                  value={goalTarget}
+                  onChange={(e) => setGoalTarget(e.target.value)}
+                  placeholder="300000"
+                />
+                <Input
+                  label="Target Completion Date"
+                  required
+                  type="date"
+                  value={goalDate}
+                  onChange={(e) => setGoalDate(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="font-mono text-xs uppercase tracking-wider text-slate-700 font-bold block mb-2">Target Amount (₹)</label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-sm text-slate-500 font-bold">₹</span>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      value={goalTarget}
-                      onChange={(e) => setGoalTarget(e.target.value)}
-                      placeholder="300000"
-                      className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl font-mono text-sm focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none bg-white"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="font-mono text-xs uppercase tracking-wider text-slate-700 font-bold block mb-2">Target Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={goalDate}
-                    onChange={(e) => setGoalDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl font-mono text-sm focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none bg-white"
-                  />
-                </div>
-              </div>
             </CardContent>
-            <CardFooter>
-              <Button type="button" variant="secondary" onClick={() => setStep(1)} size="sm">← Back</Button>
-              <Button type="submit" variant="primary">Next: Import Statement →</Button>
+            <CardFooter className="flex justify-between items-center border-t border-slate-100 pt-4">
+              <Button type="button" variant="secondary" onClick={() => setStep(1)} size="sm" icon={ArrowLeft}>
+                Back
+              </Button>
+              <Button type="submit" variant="primary" icon={ArrowRight}>
+                Next: Ingest Statement
+              </Button>
             </CardFooter>
           </form>
         </Card>
@@ -319,12 +320,12 @@ export default function UploadPage() {
 
       {/* ── Step 3: Upload ───── */}
       {step === 3 && !uploadResult && (
-        <Card className="animate-fade-in" hover={false}>
+        <Card className="animate-fade-in border-slate-200/80 bg-white shadow-card" hover={false}>
           <CardHeader>
-            <Badge variant="emerald" className="w-fit mb-2">Step 03 of 03</Badge>
-            <CardTitle>Import Bank Statement</CardTitle>
+            <Badge variant="emerald" size="sm" className="w-fit mb-2">Step 03 of 03</Badge>
+            <CardTitle>Ingest Bank Statement CSV</CardTitle>
             <CardDescription>
-              Drop your CSV bank statement below. LPF auto-categorises transactions and detects recurring subscriptions.
+              Import raw bank exports. Transactions are matched against merchant rules, recurring liabilities are flagged, and missing categories are predicted with LLM fallback.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleUpload}>
@@ -333,25 +334,26 @@ export default function UploadPage() {
 
               {/* Format hints */}
               <div className="grid grid-cols-3 gap-2">
-                {['SBI NetBanking CSV', 'HDFC Bank CSV', 'Any standard CSV'].map((fmt) => (
-                  <div key={fmt} className="text-center bg-slate-50 border border-slate-200 rounded-xl p-2">
-                    <p className="font-mono text-[10px] text-slate-600 font-semibold">{fmt}</p>
+                {['HDFC NetBanking CSV', 'ICICI / SBI CSV', 'Standard Generic CSV'].map((fmt) => (
+                  <div key={fmt} className="text-center bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 shadow-subtle">
+                    <p className="font-mono text-[10px] text-slate-500 font-medium">{fmt}</p>
                   </div>
                 ))}
               </div>
 
               {error && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl font-mono text-xs text-rose-700">
-                  ⚠️ {error}
+                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl font-mono text-xs text-rose-700 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
+                  <span>{error}</span>
                 </div>
               )}
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex justify-between items-center border-t border-slate-100 pt-4">
               <Button type="button" variant="secondary" onClick={handleSkipDemo} size="sm">
                 Use Demo Dataset
               </Button>
-              <Button type="submit" variant="primary" isLoading={uploading} disabled={!file}>
-                {uploading ? 'Processing Statement...' : 'Upload & Analyse →'}
+              <Button type="submit" variant="primary" isLoading={uploading} disabled={!file} icon={UploadCloud}>
+                {uploading ? 'Processing Statement...' : 'Ingest & Classify'}
               </Button>
             </CardFooter>
           </form>
@@ -360,27 +362,29 @@ export default function UploadPage() {
 
       {/* ── Upload Result ───── */}
       {uploadResult && (
-        <Card hover={false}>
-          <CardContent>
+        <Card hover={false} className="border-slate-200/80 bg-white shadow-card">
+          <CardContent className="p-4">
             <UploadResult result={uploadResult} onContinue={goToDashboard} />
           </CardContent>
         </Card>
       )}
 
-      {/* ── Admin reset (bottom) ───── */}
-      <div className="mt-10 pt-6 border-t border-slate-200 text-center">
-        <p className="font-mono text-xs text-slate-400 mb-3">
-          Already have data? Reset the database to the seeded demo state.
+      {/* ── Reset demo state ───── */}
+      <div className="mt-12 pt-6 border-t border-slate-200 text-center">
+        <p className="font-mono text-xs text-slate-500 mb-3">
+          Want to restore the standard baseline demo fixtures?
         </p>
         <Button
           onClick={handleReset}
           variant="secondary"
           size="sm"
           isLoading={resetting}
+          icon={RotateCcw}
         >
-          {resetting ? 'Resetting...' : '↺ Reset to Demo Data'}
+          {resetting ? 'Resetting DB...' : 'Reset to Seeded Demo Data'}
         </Button>
       </div>
     </div>
   )
 }
+

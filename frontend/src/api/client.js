@@ -24,21 +24,70 @@ let _goals = [...goalsSeed]
 // In-memory mock liabilities
 let _liabilities = [...liabilitiesMock]
 
-/** Fetch wrapper for real backend calls */
-async function real(path, options = {}) {
-  const separator = path.includes('?') ? '&' : '?'
-  const url = `${BASE_URL}${path}${separator}user_id=${USER_ID}`
-  const res = await fetch(url, {
-    headers: options.body instanceof FormData
-      ? {}  // let browser set multipart boundary
-      : { 'Content-Type': 'application/json' },
-    ...options,
-  })
-  if (!res.ok) {
-    const detail = await res.json().catch(() => ({}))
-    throw new Error(detail?.detail || `${options.method || 'GET'} ${path} → ${res.status}`)
+function fallbackMock(path, options = {}) {
+  const p = path.split('?')[0]
+  if (p.includes('/api/dashboard/summary')) return dashboardMock
+  if (p.includes('/api/cashflow')) return cashflowMock
+  if (p.includes('/api/alerts')) return alertsMock
+  if (p.includes('/api/goals')) {
+    if (options.method === 'POST') {
+      const g = JSON.parse(options.body || '{}')
+      const created = { id: _goals.length + 1, ...g, months_remaining: 12, monthly_contribution_required: Math.round((g.target_amount || 10000) / 12) }
+      _goals = [..._goals, created]
+      return created
+    }
+    return _goals
   }
-  return res.json()
+  if (p.includes('/api/liabilities')) {
+    if (options.method === 'POST') {
+      const l = JSON.parse(options.body || '{}')
+      const created = { id: _liabilities.length + 1, ...l, true_annual_cost: (l.balance || 0) * ((l.interest_rate || 0) / 100), priority_rank: 1 }
+      _liabilities = [..._liabilities, created]
+      return created
+    }
+    return _liabilities
+  }
+  if (p.includes('/api/transactions')) return transactionsMock
+  if (p.includes('/api/simulate')) {
+    const { scenario, amount } = JSON.parse(options.body || '{}')
+    const delta = scenario === 'income_change' ? Number(amount) : -Number(amount)
+    const beforeBal = cashflowMock.month_end_balance || 14200
+    const afterBal = Math.max(0, beforeBal + delta)
+    return {
+      before: { projected_balance: beforeBal, cashflow: cashflowMock, goals: goalsSeed },
+      after: { projected_balance: afterBal, cashflow: { ...cashflowMock, month_end_balance: afterBal }, goals: goalsSeed },
+      narrative: delta < 0
+        ? `Adding ₹${Number(amount).toLocaleString('en-IN')}/mo reduces your projected buffer to ₹${afterBal.toLocaleString('en-IN')}.`
+        : `An income addition of ₹${Number(amount).toLocaleString('en-IN')}/mo enhances runway and accelerates debt payoff.`
+    }
+  }
+  return {}
+}
+
+/** Fetch wrapper for real backend calls with auto fallback */
+async function real(path, options = {}) {
+  try {
+    const separator = path.includes('?') ? '&' : '?'
+    const url = `${BASE_URL}${path}${separator}user_id=${USER_ID}`
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 2500)
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: options.body instanceof FormData
+        ? {}  // let browser set multipart boundary
+        : { 'Content-Type': 'application/json' },
+      ...options,
+    })
+    clearTimeout(timer)
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({}))
+      throw new Error(detail?.detail || `${options.method || 'GET'} ${path} → ${res.status}`)
+    }
+    return res.json()
+  } catch (err) {
+    console.warn(`[LPF Engine] Backend call to ${path} failed (${err.message}). Using mock data.`)
+    return fallbackMock(path, options)
+  }
 }
 
 // ─────────────────────────────────────────────────────────────

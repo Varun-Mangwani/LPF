@@ -4,7 +4,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Apex Slate & Indigo Design Palette
+        background: '#F8FAFC',
+        surface: {
+          DEFAULT: '#FFFFFF',
+          raised: '#F1F5F9',
+          elevated: '#FFFFFF',
+        },
+        border: {
+          DEFAULT: '#E2E8F0',
+          subtle: '#F1F5F9',
+          strong: '#CBD5E1',
+        },
+        text: {
+          primary: '#0F172A',
+          secondary: '#475569',
+          muted: '#94A3B8',
+        },
         primary: {
           50:  '#EEF2FF',
           100: '#E0E7FF',
@@ -12,7 +27,7 @@ export default {
           300: '#A5B4FC',
           400: '#818CF8',
           500: '#6366F1',
-          600: '#4F46E5', // Primary Brand Action
+          600: '#4F46E5',
           700: '#4338CA',
           800: '#3730A3',
           900: '#312E81',
@@ -25,7 +40,7 @@ export default {
           300: '#6EE7B7',
           400: '#34D399',
           500: '#10B981',
-          600: '#059669', // Income / Savings / Positive
+          600: '#059669',
           700: '#047857',
           800: '#065F46',
           900: '#064E3B',
@@ -37,7 +52,7 @@ export default {
           300: '#FDA4AF',
           400: '#FB7185',
           500: '#F43F5E',
-          600: '#E11D48', // Expense / Debt / Alert
+          600: '#E11D48',
           700: '#BE123C',
           800: '#9F1239',
           900: '#881337',
@@ -49,48 +64,48 @@ export default {
           300: '#FCD34D',
           400: '#FBBF24',
           500: '#F59E0B',
-          600: '#D97706', // Warning / Projection
+          600: '#D97706',
           700: '#B45309',
           800: '#92400E',
           900: '#78350F',
         },
         slate: {
-          50:  '#F8FAFC', // Crisp Main Background Canvas
-          100: '#F1F5F9', // Muted Element Fill
-          200: '#E2E8F0', // Border Lines
-          300: '#CBD5E1', // Subtle Divider
-          400: '#94A3B8', // Placeholder / Disabled
-          500: '#64748B', // Secondary Subtitles
-          600: '#475569', // Muted Body Copy
-          700: '#334155', // Subheadings
-          800: '#1E293B', // High-Contrast Subtitles
-          900: '#0F172A', // Primary Headings & Dark Elements
+          50:  '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0',
+          300: '#CBD5E1',
+          400: '#94A3B8',
+          500: '#64748B',
+          600: '#475569',
+          700: '#334155',
+          800: '#1E293B',
+          900: '#0F172A',
           950: '#020617',
         },
-        // Legacy alias fallbacks for backwards compatibility
-        paper:     '#F8FAFC',
-        paperline: '#E2E8F0',
-        surface:   '#FFFFFF',
-        stamp:     '#F1F5F9',
-        ink:       '#0F172A',
-        inksoft:   '#64748B',
       },
       fontFamily: {
-        display: ['"Outfit"', '"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
-        body:    ['"Inter"', 'sans-serif'],
-        mono:    ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
+        display: ['"Outfit"', '"Plus Jakarta Sans"', 'sans-serif'],
+        body: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
-        'subtle':     '0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05)',
-        'card':       '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02)',
-        'card-hover': '0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03)',
-        'glow-indigo':'0 0 24px -4px rgba(79, 70, 229, 0.3)',
-        'glow-emerald':'0 0 24px -4px rgba(5, 150, 105, 0.3)',
+        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+        'glass': '0 8px 30px rgba(0, 0, 0, 0.04)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 6px 16px -4px rgba(0, 0, 0, 0.04)',
+        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 18px 32px -4px rgba(99, 102, 241, 0.09)',
+        'glow-indigo': '0 0 25px -4px rgba(99, 102, 241, 0.25)',
+        'glow-emerald': '0 0 25px -4px rgba(16, 185, 129, 0.25)',
+        'glow-rose': '0 0 25px -4px rgba(244, 63, 94, 0.25)',
+        'glow-amber': '0 0 25px -4px rgba(245, 158, 11, 0.25)',
       },
       borderRadius: {
-        card: '16px',
+        card: '18px',
+      },
+      backgroundImage: {
+        'radial-glow': 'radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 70%)',
       },
     },
   },
   plugins: [],
 }
+

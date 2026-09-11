@@ -1,37 +1,46 @@
 export function Input({
-  label, helperText, error, leftIcon, rightIcon,
-  id, className = '', ...props
+  label,
+  helperText,
+  error,
+  leftIcon,
+  rightIcon,
+  id,
+  className = '',
+  ...props
 }) {
   return (
     <div className="space-y-1.5">
       {label && (
-        <label htmlFor={id} className="font-mono text-[10px] uppercase tracking-wider text-slate-700 font-bold block">
+        <label htmlFor={id} className="font-body text-xs font-semibold text-slate-700 block">
           {label}
         </label>
       )}
-      <div className="relative">
+      <div className="relative flex items-center">
         {leftIcon && (
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-sm text-slate-500 font-bold pointer-events-none">
+          <span className="absolute left-3.5 text-slate-400 pointer-events-none flex items-center justify-center">
             {leftIcon}
           </span>
         )}
         <input
           id={id}
-          className={`w-full border border-slate-300 rounded-xl px-4 py-3 font-mono text-sm text-slate-900 bg-white placeholder:text-slate-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none transition-all ${leftIcon ? 'pl-8' : ''} ${rightIcon ? 'pr-8' : ''} ${className}`}
+          className={`w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-all shadow-subtle ${
+            leftIcon ? 'pl-10' : ''
+          } ${rightIcon ? 'pr-10' : ''} ${error ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20' : ''} ${className}`}
           {...props}
         />
         {rightIcon && (
-          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 font-mono text-xs text-slate-500 pointer-events-none">
+          <span className="absolute right-3.5 text-slate-400 pointer-events-none flex items-center justify-center">
             {rightIcon}
           </span>
         )}
       </div>
       {helperText && !error && (
-        <p className="font-mono text-[10px] text-slate-500">{helperText}</p>
+        <p className="font-body text-xs text-slate-500">{helperText}</p>
       )}
       {error && (
-        <p className="font-mono text-[10px] text-rose-600">{error}</p>
+        <p className="font-body text-xs text-rose-600 font-medium">{error}</p>
       )}
     </div>
   )
 }
+

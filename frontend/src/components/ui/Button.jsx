@@ -1,9 +1,22 @@
+import React from 'react'
+
+function renderIconHelper(icon) {
+  if (!icon) return null
+  if (React.isValidElement(icon)) return icon
+  if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null && icon.$$typeof)) {
+    const Component = icon
+    return <Component className="w-4 h-4 shrink-0" />
+  }
+  return icon
+}
+
 export function Button({
   children,
   variant = 'primary',
   size = 'md',
   isLoading = false,
   disabled = false,
+  icon,
   leftIcon,
   rightIcon,
   className = '',
@@ -11,22 +24,37 @@ export function Button({
   onClick,
   ...props
 }) {
-  const base = 'inline-flex items-center gap-2 font-mono font-bold uppercase tracking-wider rounded-xl transition-all duration-150 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none'
+  const base =
+    'inline-flex items-center justify-center font-body font-semibold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none select-none cursor-pointer'
 
   const variants = {
-    primary:   'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm hover:shadow-md',
-    secondary: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 shadow-sm',
-    emerald:   'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow-md',
-    danger:    'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
-    ghost:     'text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-3 py-2 rounded-xl',
-    indigo:    'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm hover:shadow-md',
+    primary:
+      'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/25 border border-indigo-600/20 hover:shadow-md',
+    secondary:
+      'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-sm hover:border-slate-300',
+    emerald:
+      'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/25 border border-emerald-600/20 hover:shadow-md',
+    danger:
+      'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80',
+    ghost:
+      'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80',
+    glass:
+      'bg-white/80 hover:bg-white text-slate-700 border border-slate-200 shadow-sm backdrop-blur-md',
+    indigo:
+      'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-500/25 border border-indigo-600/20',
+    gold:
+      'bg-amber-500 hover:bg-amber-600 text-white shadow-sm shadow-amber-500/25 border border-amber-500/20',
   }
 
   const sizes = {
-    sm:  'text-[10px] px-3.5 py-2',
-    md:  'text-[11px] px-4 py-2.5',
-    lg:  'text-xs px-6 py-3',
+    sm: 'text-xs px-3 py-1.5 rounded-xl gap-1.5',
+    md: 'text-xs sm:text-sm px-4 py-2 rounded-xl gap-2',
+    lg: 'text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl gap-2.5 font-bold',
   }
+
+  const renderedIcon = renderIconHelper(icon)
+  const renderedLeftIcon = renderIconHelper(leftIcon)
+  const renderedRightIcon = renderIconHelper(rightIcon)
 
   return (
     <button
@@ -43,11 +71,13 @@ export function Button({
         </>
       ) : (
         <>
-          {leftIcon  && <span>{leftIcon}</span>}
+          {renderedIcon}
+          {renderedLeftIcon && <span className="shrink-0 flex items-center justify-center">{renderedLeftIcon}</span>}
           {children}
-          {rightIcon && <span>{rightIcon}</span>}
+          {renderedRightIcon && <span className="shrink-0 flex items-center justify-center">{renderedRightIcon}</span>}
         </>
       )}
     </button>
   )
 }
+
