@@ -14,7 +14,8 @@ import alertsMock    from '../mock/alerts.json'
 import transactionsMock from '../mock/transactions.json'
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-const rawBase = import.meta.env.VITE_API_BASE_URL || 'https://lpf-rqjg.onrender.com'
+const defaultBase = import.meta.env.DEV ? 'http://localhost:8000' : 'https://lpf-rqjg.onrender.com'
+const rawBase = import.meta.env.VITE_API_BASE_URL || defaultBase
 // Always remove trailing slashes to prevent //api/... 404 errors on FastAPI
 export const BASE_URL = rawBase.trim().replace(/\/+$/, '')
 const USER_ID  = import.meta.env.VITE_USER_ID || '1'

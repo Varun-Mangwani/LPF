@@ -87,7 +87,7 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-3">
             <Button
-              onClick={() => navigate('/upload')}
+              onClick={() => navigate('/dashboard')}
               variant="primary"
               size="md"
               icon={ArrowRight}
@@ -135,7 +135,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed"
               >
-                Ledger Personal Finance (LPF) ingests multi-bank statements, categorizes burn rates, ranks high-interest liabilities by APR Avalanche, and stress-tests what-if life moves — with 100% mathematical integrity.
+                This demo project simulates the original Ledger Personal Finance experience using seeded demo data. Explore multi-bank statement analysis, burn-rate categories, APR Avalanche rankings, and what-if scenarios with 100% mathematical integrity.
               </motion.p>
 
               <motion.div

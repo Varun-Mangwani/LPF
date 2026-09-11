@@ -385,6 +385,10 @@ export default function UploadPage() {
             <CardContent className="space-y-4">
               <DragDropZone file={file} onFile={setFile} />
 
+              <p className="font-mono text-xs text-indigo-700 bg-indigo-50/70 border border-indigo-100 rounded-xl px-3 py-2.5">
+                Best demo: upload <span className="font-bold">bank_statement_demo.csv</span> for a complete salary, bills, subscriptions, EMI, and spending analysis.
+              </p>
+
               {/* Format hints */}
               <div className="grid grid-cols-3 gap-2">
                 {['HDFC NetBanking CSV', 'ICICI / SBI CSV', 'Standard Generic CSV'].map((fmt) => (
