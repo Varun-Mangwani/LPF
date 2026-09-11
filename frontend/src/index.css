@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  ::selection {
+    background-color: #4F46E5;
+    color: #FFFFFF;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-slate-900 font-bold tracking-tight;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  a, button, input, select, textarea {
+    outline-offset: 2px;
+  }
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid #4F46E5;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Legacy card support mapped to new design system */
+  .ledger-card {
+    @apply relative bg-white border border-slate-200/80 rounded-2xl shadow-card transition-all duration-200 hover:shadow-card-hover;
+  }
+
+  .stat-card {
+    @apply ledger-card p-5 cursor-default bg-gradient-to-br from-white to-slate-50/50;
+  }
+  .stat-card.income {
+    @apply border-l-4 border-l-emerald-600;
+  }
+  .stat-card.expense {
+    @apply border-l-4 border-l-rose-600;
+  }
+  .stat-card.projected {
+    @apply border-l-4 border-l-amber-600;
+  }
+
+  .tearoff-trigger {
+    @apply inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-emerald-600 font-semibold transition-all hover:text-emerald-700 hover:gap-2;
+  }
+  .tearoff-panel {
+    @apply mt-3 border-t-2 border-dashed border-slate-200 pt-3 font-mono text-xs leading-relaxed text-slate-800 animate-slide-down;
+  }
+  .tearoff-line {
+    @apply flex items-baseline justify-between gap-4 py-1 border-b border-dotted border-slate-200/80;
+  }
+  .tearoff-line:last-child {
+    @apply border-b-0 font-medium text-emerald-700 pt-1;
+  }
+
+  /* Page header standard block */
+  .page-header {
+    @apply mb-8;
+  }
+  .page-kicker {
+    @apply font-mono text-xs uppercase tracking-widest text-indigo-600 font-bold mb-2 flex items-center gap-2;
+  }
+  .page-title {
+    @apply font-display text-3xl sm:text-4xl text-slate-900 leading-tight font-extrabold tracking-tight;
+  }
+  .page-subtitle {
+    @apply text-slate-600 mt-2 text-sm sm:text-base leading-relaxed max-w-2xl;
+  }
+}
+
+/* Animations */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-slide-up   { animation: slideUp   0.3s ease-out; }
+.animate-slide-down { animation: slideDown 0.2s ease-out; }
+.animate-fade-in    { animation: fadeIn    0.3s ease-out; }

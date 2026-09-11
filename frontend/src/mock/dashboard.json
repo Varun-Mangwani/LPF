@@ -1,0 +1,20 @@
+{
+  "total_income": 82000,
+  "total_expense": 58400,
+  "by_category": [
+    { "category": "Rent",       "amount": 22000, "essential": true },
+    { "category": "EMI",        "amount": 9800,  "essential": true },
+    { "category": "Groceries",  "amount": 6400,  "essential": true },
+    { "category": "Utilities",  "amount": 3000,  "essential": true },
+    { "category": "Subscription","amount": 2100, "essential": false },
+    { "category": "Food",       "amount": 5200,  "essential": false },
+    { "category": "Shopping",   "amount": 6800,  "essential": false },
+    { "category": "Transport",  "amount": 3100,  "essential": false }
+  ],
+  "recurring_subscriptions": [
+    { "merchant": "Netflix",      "amount": 649,  "category": "Subscription", "frequency_days": 30 },
+    { "merchant": "Spotify",      "amount": 119,  "category": "Subscription", "frequency_days": 30 },
+    { "merchant": "Cult.fit Gym", "amount": 1200, "category": "Subscription", "frequency_days": 30 },
+    { "merchant": "Amazon Prime", "amount": 299,  "category": "Subscription", "frequency_days": 30 }
+  ]
+}

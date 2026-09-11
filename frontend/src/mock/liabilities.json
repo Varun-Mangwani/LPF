@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "name": "Credit Card — HDFC Millennia",
+    "type": "card",
+    "balance": 34500,
+    "interest_rate": 42.0,
+    "min_payment": 1725,
+    "true_annual_cost": 14490,
+    "priority_rank": 1,
+    "reasoning": "Highest interest rate at 42.0% — costs ₹14,490/year on the current balance. Paying this down first saves the most money (avalanche method)."
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "name": "Car Loan — EMI",
+    "type": "loan",
+    "balance": 286000,
+    "interest_rate": 9.5,
+    "min_payment": 9500,
+    "true_annual_cost": 27170,
+    "priority_rank": 2,
+    "reasoning": "9.5% interest (vs 42.0% on your top-priority debt) — ₹27,170/year. Pay minimums here until higher-rate debt is cleared."
+  }
+]

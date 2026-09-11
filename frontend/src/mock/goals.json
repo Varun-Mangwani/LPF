@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "name": "Emergency Fund",
+    "target_amount": 150000,
+    "current_amount": 42000,
+    "target_date": "2027-03-01",
+    "monthly_contribution_required": 18000,
+    "months_remaining": 6,
+    "created_at": "2026-09-01T00:00:00"
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "name": "Vacation Fund",
+    "target_amount": 60000,
+    "current_amount": 5000,
+    "target_date": "2027-06-01",
+    "monthly_contribution_required": 6111,
+    "months_remaining": 9,
+    "created_at": "2026-09-01T00:00:00"
+  }
+]
