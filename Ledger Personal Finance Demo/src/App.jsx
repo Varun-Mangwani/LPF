@@ -169,7 +169,7 @@ function Sidebar({ onOpenAi, mobileOpen, setMobileOpen }) {
   )
 }
 
-function TopBar({ onToggleMobile, onOpenAi }) {
+function TopBar({ onToggleMobile, onOpenAi, onResetDemo }) {
   const location = useLocation()
   const currentPath = location.pathname
 
@@ -207,6 +207,19 @@ function TopBar({ onToggleMobile, onOpenAi }) {
       </div>
 
       <div className="flex items-center gap-3">
+        {/* Demo Mode Badge */}
+        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/90 text-emerald-800 text-[11px] font-mono font-medium shadow-subtle">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Demo Mode</span>
+          <button
+            onClick={onResetDemo}
+            title="Reset demo data to seeded baseline"
+            className="ml-1 text-[10px] text-emerald-700 hover:text-emerald-900 underline font-bold cursor-pointer"
+          >
+            Reset
+          </button>
+        </div>
+
         {/* Quick search input */}
         <button
           onClick={onOpenAi}
@@ -238,7 +251,7 @@ function TopBar({ onToggleMobile, onOpenAi }) {
   )
 }
 
-function AppLayout({ children, onOpenAi }) {
+function AppLayout({ children, onOpenAi, onResetDemo }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/'
@@ -250,7 +263,7 @@ function AppLayout({ children, onOpenAi }) {
       <Sidebar onOpenAi={onOpenAi} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
-        <TopBar onToggleMobile={() => setMobileOpen((v) => !v)} onOpenAi={onOpenAi} />
+        <TopBar onToggleMobile={() => setMobileOpen((v) => !v)} onOpenAi={onOpenAi} onResetDemo={onResetDemo} />
 
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
@@ -265,9 +278,36 @@ function AppLayout({ children, onOpenAi }) {
 
 export default function App() {
   const [aiOpen, setAiOpen] = useState(false)
+  const [summary, setSummary] = useState(null)
+  const [cashflow, setCashflow] = useState(null)
+  const [liabilities, setLiabilities] = useState([])
+  const [goals, setGoals] = useState([])
+
+  const loadData = () => {
+    Promise.all([
+      api.getDashboardSummary(),
+      api.getCashflow(),
+      api.getLiabilities(),
+      api.getGoals(),
+    ])
+      .then(([s, c, l, g]) => {
+        setSummary(s)
+        setCashflow(c)
+        setLiabilities(l)
+        setGoals(g)
+      })
+      .catch(() => {})
+  }
+
+  const handleResetDemo = async () => {
+    if (window.confirm('Reset all demo state to the default seeded baseline?')) {
+      await api.resetDb()
+      window.location.reload()
+    }
+  }
 
   return (
-    <AppLayout onOpenAi={() => setAiOpen(true)}>
+    <AppLayout onOpenAi={() => { loadData(); setAiOpen(true) }} onResetDemo={handleResetDemo}>
       <Routes>
         <Route path="/"             element={<LandingPage />} />
         <Route path="/upload"       element={<UploadPage />} />
@@ -280,7 +320,14 @@ export default function App() {
         <Route path="*"             element={<NotFoundPage />} />
       </Routes>
 
-      <AiAssistantModal isOpen={aiOpen} onClose={() => setAiOpen(false)} />
+      <AiAssistantModal
+        isOpen={aiOpen}
+        onClose={() => setAiOpen(false)}
+        summary={summary}
+        cashflow={cashflow}
+        liabilities={liabilities}
+        goals={goals}
+      />
     </AppLayout>
   )
 }

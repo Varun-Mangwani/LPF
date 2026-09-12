@@ -113,7 +113,7 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/90 border border-indigo-200/80 text-indigo-700 font-mono text-xs uppercase tracking-wider font-semibold shadow-subtle backdrop-blur-md"
               >
                 <Sparkles className="w-3.5 h-3.5 text-indigo-600 animate-pulse" />
-                <span>Deterministic Financial Architecture</span>
+                <span>Instant Demo Ready · Zero Server Required</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               </motion.div>
 
